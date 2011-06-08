@@ -14,6 +14,6 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 Sergio Rubio. See LICENSE.txt for
+Copyright (c) 2011 Abiquo Inc. See LICENSE.txt for
 further details.
 

@@ -15,10 +15,10 @@ Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.version = Instalatron::VERSION
   gem.name = "instalatron"
-  gem.homepage = "http://github.com/rubiojr/instalatron"
+  gem.homepage = "http://github.com/abiquo/instalatron"
   gem.license = "MIT"
   gem.summary = %Q{Abiquo Installer Testing Framework}
-  gem.description = %Q{Test graphical installers using VirtualBox plus image recognition technics}
+  gem.description = %Q{Tests graphical installers using VirtualBox, keyboard driven input and image recognition technics}
   gem.email = "srubio@abiquo.com"
   gem.authors = ["Sergio Rubio"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,

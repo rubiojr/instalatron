@@ -4,7 +4,7 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1'
+  VERSION = '0.1.1'
 
   def self.create_vm(params = {})
     vm_name = params[:vm_name] || "instalatron_#{Time.now.to_f}"
