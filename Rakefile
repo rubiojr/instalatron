@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'bundler'
+require 'lib/instalatron.rb'
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -12,42 +13,20 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
+  gem.version = Instalatron::VERSION
   gem.name = "instalatron"
   gem.homepage = "http://github.com/rubiojr/instalatron"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
-  gem.email = "sergio@rubio.name"
+  gem.summary = %Q{Abiquo Installer Testing Framework}
+  gem.description = %Q{Test graphical installers using VirtualBox plus image recognition technics}
+  gem.email = "srubio@abiquo.com"
   gem.authors = ["Sergio Rubio"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
+  gem.add_runtime_dependency 'mixlib-cli', '>= 1.2'
+  gem.add_runtime_dependency 'mixlib-cli', '>= 1.2'
+  gem.add_runtime_dependency 'virtualbox', '>= 0.8'
   #  gem.add_development_dependency 'rspec', '> 1.2.3'
 end
 Jeweler::RubygemsDotOrgTasks.new
 
-require 'rake/testtask'
-Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-end
-
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-end
-
-task :default => :test
-
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "instalatron #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end

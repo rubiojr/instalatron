@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+require 'yaml'
+require 'instalatron'
+
+def monitor_session(vm_name, script)
+  ctrlc_gap = 0
+  basedir = File.dirname(script)
+  script = YAML.load_file(script)
+  require 'pp'
+  script.each do |screen|
+    ref_img = "#{basedir}/#{File.basename(screen[:image])}"
+    print "Waiting for '#{screen[:name]}'... ".ljust(45)
+    loop do 
+      begin
+      img = Instalatron.detect_screen(vm_name) 
+      if Instalatron.same_image?(ref_img, img)
+        puts "DETECTED"
+        break
+      end
+      rescue Interrupt, SystemExit
+        if Time.now.to_f - ctrlc_gap < 0.5
+          puts "\n\nDouble Ctrl-c detected. Aborting."
+          exit
+        else
+          ctrlc_gap = Time.now.to_f
+        end
+        puts "SKIP"
+        break
+      end
+    end
+  end
+end
+
+$stdout.sync = true
+vm_name = ARGV[0]
+running_vms = []
+`VBoxManage list runningvms`.each_line do |l|
+  vm = l.split[0].gsub('"', '')
+  running_vms << vm
+end
+if not running_vms.include?(vm_name)
+  $stderr.puts "Running VM #{vm_name} not found.\n\n"
+  $stderr.puts "Usage: instalatron-monitor <vm_name> <script>"
+  exit 1
+end
+
+script = ARGV[1]
+if script.nil? or not File.exist?(script)
+  $stderr.puts "Invalid script.\n\n"
+  $stderr.puts "Usage: instalatron-monitor <vm_name> <script>"
+  exit 1
+end
+
+puts "Monitoring #{vm_name} VM\n\n"
+puts "CTRL-C skipts step"
+puts "Pressing CTRL-C twice aborts\n\n"
+monitor_session vm_name, script

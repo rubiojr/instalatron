@@ -1,0 +1,106 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+require 'instalatron'
+require 'yaml'
+require 'mixlib/cli'
+
+def play_session(vm_name, script)
+  ctrlc_gap = 0
+  basedir = File.dirname(script)
+  script = YAML.load_file(script)
+  require 'pp'
+  script.each do |screen|
+    ref_img = "#{basedir}/#{File.basename(screen[:image])}"
+    loop do 
+      begin
+      img = Instalatron.detect_screen(vm_name) 
+      if Instalatron.same_image?(ref_img, img)
+        puts "Screen detected: #{screen[:name]}"
+        Instalatron.command_window screen[:sequence], vm_name
+        break
+      end
+      rescue Interrupt, SystemExit
+        if Time.now.to_f - ctrlc_gap < 0.5
+          puts "\n\nDouble Ctrl-c detected. Aborting."
+          exit
+        else
+          ctrlc_gap = Time.now.to_f
+        end
+        puts "Skipping #{screen[:name]}"
+        break
+      end
+    end
+  end
+end
+
+def required_option(cli, opt)
+  if cli.config[opt].nil?
+    $stderr.puts "\n#{opt.to_s} argument requied.\n\n"
+    $stderr.puts cli.opt_parser.help
+    exit 1
+  end
+  return cli.config[opt]
+end
+
+def usage(cli)
+  $stderr.puts cli.opt_parser.help
+  exit 1
+end
+
+class MyCLI
+  include Mixlib::CLI
+
+  option :vm_name,
+    :short => "-n NAME",
+    :long => "--vm-name NAME",
+    :description => "Virtual Machine Name",
+    :default => "instalatron_#{Time.now.strftime('%s')}"
+ 
+  option :iso_file,
+    :short => "-i ISO",
+    :long => "--iso-file ISO",
+    :description => "ISO file to boot the VM with"
+  
+  option :script,
+    :short => "-s SCRIPT",
+    :long => "--script SCRIPT",
+    :description => "Path to the script file (script.yml) or directory."
+
+  option :help,
+    :short => "-h",
+    :long => "--help",
+    :description => "Show this message",
+    :on => :tail,
+    :boolean => true,
+    :show_options => true,
+    :exit => 0
+
+end
+
+cli = MyCLI.new
+cli.parse_options
+
+vm_name = cli.config[:vm_name] 
+
+script = required_option(cli, :script)
+
+if File.directory?(script)
+  script = script + '/script.yml'
+end
+
+if not File.exist?(script)
+  $stderr.puts "Script file script.yml not found.\n\n"
+  usage(cli)
+end
+
+iso_file = required_option(cli, :iso_file)
+if not File.exist?(iso_file)
+  $stderr.puts "Invalid ISO file.\n\n"
+  usage(cli)
+end
+
+# Create VBox VM first
+Instalatron.create_vm :vm_name => vm_name, :iso_file => iso_file
+
+puts "Playing script using VM #{vm_name}\n\n"
+play_session vm_name, script

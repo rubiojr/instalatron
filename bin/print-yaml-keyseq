@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+require 'yaml'
+require 'pp'
+
+seq = $stdin.gets.strip.chomp
+
+chars = []
+seq.each_char do |c|
+  chars << c	
+end
+
+puts chars.to_yaml
+
+
+
