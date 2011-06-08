@@ -4,7 +4,14 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1.1'
+  VERSION = '0.1.2'
+
+  def self.destroy_vm(vm_name)
+    `VBoxManage controlvm '#{vm_name}' poweroff > /dev/null 2>&1`
+    # dumb
+    sleep 1
+    `VBoxManage unregistervm  '#{vm_name}' --delete > /dev/null 2>&1`
+  end
 
   def self.create_vm(params = {})
     vm_name = params[:vm_name] || "instalatron_#{Time.now.to_f}"

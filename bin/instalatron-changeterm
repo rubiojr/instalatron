@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+def usage
+  puts "Usage: instalatron-changeterm <vm-name> <term-no>"
+  puts "\nvm-name is the name of the VirtualBox VM"
+  puts "term-no is the linux terminal number (1,2,3,4,5,...)"
+  exit 1
+end
+
+vm_name = ARGV[0]
+term = ARGV[1]
+if vm_name.nil? or term.nil?
+  usage
+end
+
+begin
+  term = term.to_i
+rescue Exception
+  usage
+end
+
+kbd = [
+  '1d 38 3b', 
+  '1d 38 3c',
+  '1d 38 3d',
+  '1d 38 3e',
+  '1d 38 3f',
+  '1d 38 40',
+  '1d 38 41',
+  '1d 38 42'
+]
+
+`VBoxManage controlvm #{vm_name} keyboardputscancode #{kbd[term]}`
