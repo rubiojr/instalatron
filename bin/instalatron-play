@@ -4,7 +4,7 @@ require 'instalatron'
 require 'yaml'
 require 'mixlib/cli'
 
-def play_session(vm_name, script, custom_seq = nil)
+def play_session(vm_name, script, custom_seq = nil, key_press_delay = 0)
   ctrlc_gap = 0
   basedir = File.dirname(script)
   script = YAML.load_file(script)
@@ -21,7 +21,7 @@ def play_session(vm_name, script, custom_seq = nil)
       img = Instalatron.detect_screen(vm_name) 
       if Instalatron.same_image?(ref_img, img)
         puts "Screen detected: #{screen[:name]}"
-        Instalatron.command_window screen[:sequence], vm_name
+        Instalatron.command_window screen[:sequence], vm_name, key_press_delay
         break
       end
       rescue Interrupt, SystemExit
@@ -81,6 +81,16 @@ class MyCLI
     :long => "--destroy-vm",
     :description => "Destroy the VM after running the tests"
 
+  option :headless,
+    :long => "--headless",
+    :description => "Run the VMs without GUI",
+    :default => false
+  
+  option :key_press_delay,
+    :long => "--key-press-delay SECS",
+    :description => "Delay between key presses",
+    :default => 0
+
   option :help,
     :short => "-h",
     :long => "--help",
@@ -115,10 +125,10 @@ if not File.exist?(iso_file)
 end
 
 # Create VBox VM first
-Instalatron.create_vm :vm_name => vm_name, :iso_file => iso_file
+Instalatron.create_vm :vm_name => vm_name, :iso_file => iso_file, :headless => cli.config[:headless]
 
 puts "Playing script using VM #{vm_name}\n\n"
-play_session vm_name, script, cli.config[:custom_sequence]
+play_session vm_name, script, cli.config[:custom_sequence], cli.config[:key_press_delay]
 
 if cli.config[:destroy_vm]
   puts "Unregistering and deleting VM #{vm_name}"

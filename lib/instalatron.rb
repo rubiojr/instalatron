@@ -4,7 +4,7 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1.2'
+  VERSION = '0.1.3'
 
   def self.destroy_vm(vm_name)
     `VBoxManage controlvm '#{vm_name}' poweroff > /dev/null 2>&1`
@@ -23,6 +23,10 @@ module Instalatron
     vboxcmd = params[:vboxcmd] || 'VBoxManage'
     vm_memory = params[:vm_memory] || 512
     vm_cpus = params[:vm_cpus] || 1
+    if params[:headless].nil?
+      params[:headless] = false
+    end
+    headless = params[:headless] ? 'headless':'gui'
     # listing os types
     # VirtualBox::Global.global.lib.virtualbox.guest_os_types.each do |os|
     #   puts os.id
@@ -67,7 +71,7 @@ module Instalatron
     
     `#{vboxcmd} storageattach '#{vm_name}' --storagectl 'IDE Controller' --type dvddrive --port 1 --device 0 --medium '#{full_iso_file}' >/dev/null 2>&1`
 
-    vm.start
+    vm.start headless
   end
 
   def self.command_window(seq, vm_name, key_press_delay = 0)
@@ -79,7 +83,7 @@ module Instalatron
       keycodes.split.each do |k|
         `VBoxManage controlvm #{vm_name} keyboardputscancode '#{k}' >/dev/null 2>&1`
       end
-      #sleep key_press_delay
+      sleep key_press_delay.to_i
     end
   end
 
