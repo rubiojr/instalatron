@@ -91,6 +91,11 @@ class MyCLI
     :description => "Delay between key presses",
     :default => 0
 
+  option :vm_memory,
+    :long => "--vm-memory MEM",
+    :description => "VM Memory",
+    :default => 512
+
   option :help,
     :short => "-h",
     :long => "--help",
@@ -125,7 +130,7 @@ if not File.exist?(iso_file)
 end
 
 # Create VBox VM first
-Instalatron.create_vm :vm_name => vm_name, :iso_file => iso_file, :headless => cli.config[:headless]
+Instalatron.create_vm :vm_memory => cli.config[:vm_memory], :vm_name => vm_name, :iso_file => iso_file, :headless => cli.config[:headless]
 
 puts "Playing script using VM #{vm_name}\n\n"
 play_session vm_name, script, cli.config[:custom_sequence], cli.config[:key_press_delay]

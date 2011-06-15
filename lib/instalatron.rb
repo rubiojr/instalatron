@@ -4,7 +4,7 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1.3'
+  VERSION = '0.1.4'
 
   def self.destroy_vm(vm_name)
     `VBoxManage controlvm '#{vm_name}' poweroff > /dev/null 2>&1`
@@ -44,7 +44,7 @@ module Instalatron
     end
     
     vm=VirtualBox::VM.find(vm_name)
-    vm.memory_size= vm_memory
+    vm.memory_size = vm_memory.to_i
     vm.os_type_id = os_type
     vm.cpu_count  = vm_cpus
     vm.name = vm_name
@@ -83,7 +83,7 @@ module Instalatron
       keycodes.split.each do |k|
         `VBoxManage controlvm #{vm_name} keyboardputscancode '#{k}' >/dev/null 2>&1`
       end
-      sleep key_press_delay.to_i
+      sleep key_press_delay.to_f
     end
   end
 
