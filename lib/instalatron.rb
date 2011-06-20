@@ -6,6 +6,17 @@ module Instalatron
   
   VERSION = '0.1.4'
 
+  def self.add_ssh_nat_mapping(vm_name, guest_port, host_port)
+    vm=VirtualBox::VM.find(vm_name)
+    port = VirtualBox::NATForwardedPort.new
+    port.name = "guestssh"
+    port.guestport = guest_port
+    port.hostport = host_port
+    vm.network_adapters[0].nat_driver.forwarded_ports << port
+    port.save
+    vm.save  
+  end
+
   def self.destroy_vm(vm_name)
     `VBoxManage controlvm '#{vm_name}' poweroff > /dev/null 2>&1`
     # dumb
@@ -23,6 +34,7 @@ module Instalatron
     vboxcmd = params[:vboxcmd] || 'VBoxManage'
     vm_memory = params[:vm_memory] || 512
     vm_cpus = params[:vm_cpus] || 1
+    vm_disk_size = params[:vm_disk_size].to_i || 8192
     if params[:headless].nil?
       params[:headless] = false
     end
@@ -60,7 +72,7 @@ module Instalatron
     place = `#{vboxcmd}  list  systemproperties|grep '^Default machine'|cut -d ':' -f 2|sed -e 's/^[ ]*//'`.strip.chomp 
     disk_file = "#{place}/#{vm_name}/#{vm_name}.vdi"
     
-    `#{vboxcmd} createhd --filename '#{disk_file}' --size 8192 --format VDI >/dev/null 2>&1`
+    `#{vboxcmd} createhd --filename '#{disk_file}' --size #{vm_disk_size} --format VDI >/dev/null 2>&1`
     
     # Add IDE/Sata Controllers
     `#{vboxcmd} storagectl '#{vm_name}' --name 'SATA Controller' --add sata --hostiocache off >/dev/null 2>&1`
@@ -94,7 +106,7 @@ module Instalatron
     `VBoxManage controlvm #{vm_name} screenshotpng #{dest_file} >/dev/null 2>&1`
   end
 
-  def self.same_image?(ref_image, new_img, threshold = 1500)
+  def self.same_image?(ref_image, new_img, threshold = 2000)
     `file #{ref_image}` =~ /(\d+\sx\s\d+)/ 
     geom1 = $1
     `file #{new_img}` =~ /(\d+\sx\s\d+)/ 
