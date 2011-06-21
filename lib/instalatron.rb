@@ -6,6 +6,17 @@ module Instalatron
   
   VERSION = '0.1.4'
 
+  #
+  # NIC is nic1, nic2, etc
+  # device is eth0, eth1, etc
+  # mode is either :nat, :bridged, :hostonly
+  #
+  def self.set_nic_mode(vm_name, nic, device, mode)
+    err = `VBoxManage controlvm #{vm_name} #{nic} #{mode.to_s} #{device} 2>&1`
+    puts err
+    raise Exception.new(err) if $? != 0
+  end
+
   def self.add_ssh_nat_mapping(vm_name, guest_port, host_port)
     vm=VirtualBox::VM.find(vm_name)
     port = VirtualBox::NATForwardedPort.new

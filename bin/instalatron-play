@@ -3,6 +3,7 @@ require 'fileutils'
 require 'instalatron'
 require 'yaml'
 require 'mixlib/cli'
+require 'logger'
 
 def play_session(vm_name, script, custom_seq = nil, key_press_delay = 0)
   ctrlc_gap = 0
@@ -90,12 +91,21 @@ class MyCLI
     :long => "--key-press-delay SECS",
     :description => "Delay between key presses",
     :default => 0
+  
+  option :nic_config,
+    :long => "--nic-config CFG",
+    :description => "VM NIC config (nic:device:mode)"
 
   option :vm_memory,
     :long => "--vm-memory MEM",
     :description => "VM Memory",
     :default => 512
-
+  
+  option :vm_disk_size,
+    :long => "--vm-disk-size SIZE",
+    :description => "VM Disk Size in MB",
+    :default => 10024
+  
   option :help,
     :short => "-h",
     :long => "--help",
@@ -106,6 +116,8 @@ class MyCLI
     :exit => 0
 
 end
+
+Log = Logger.new($stdout)
 
 cli = MyCLI.new
 cli.parse_options
@@ -130,10 +142,19 @@ if not File.exist?(iso_file)
 end
 
 # Create VBox VM first
-Instalatron.create_vm :vm_memory => cli.config[:vm_memory], :vm_name => vm_name, :iso_file => iso_file, :headless => cli.config[:headless]
+  
+Log.debug "Creating VM #{vm_name}"
+Instalatron.create_vm :vm_disk_size => cli.config[:vm_disk_size], :vm_memory => cli.config[:vm_memory], :vm_name => vm_name, :iso_file => iso_file, :headless => cli.config[:headless]
 
+nic_config = cli.config[:nic_config]
+if nic_config
+  nic, device, mode = nic_config.split ':'
+  Log.debug "Setting nic mode #{nic} #{device} #{mode}"
+  Instalatron.set_nic_mode(vm_name, nic, device, mode)
+end
 puts "Playing script using VM #{vm_name}\n\n"
 play_session vm_name, script, cli.config[:custom_sequence], cli.config[:key_press_delay]
+
 
 if cli.config[:destroy_vm]
   puts "Unregistering and deleting VM #{vm_name}"
