@@ -1,6 +1,6 @@
 Instalatron
 -----------
-Tools to test RedHat Anaconda based installers using Oracle's VirtualBox
+CLI Tools to test RedHat Anaconda based installers using Oracle's VirtualBox
 
 Requirements
 ------------
@@ -11,4 +11,15 @@ ImageMagick >=  6.6.4
 Install
 -------
 sudo gem install instalatron
+
+
+Examples
+--------
+
+Creating a new recording
+
+`instalatron-record --iso-file my-abiquo-iso.iso`
+
+This will create a new VM in VirtualBox and will start the recording session
+
 
