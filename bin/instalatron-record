@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
+require 'rubygems'
 require 'fileutils'
 require 'instalatron'
 require 'yaml'
+require 'mixlib/cli'
 
 def record_session(vm_name, session_name = "instalatron_rec_" + Time.now.strftime("%F_%H%M"))
   puts "Recording session #{session_name}\n\n"
@@ -40,26 +42,82 @@ def record_session(vm_name, session_name = "instalatron_rec_" + Time.now.strftim
       $stdin.gets
     end
   rescue SystemExit, Interrupt
-    puts "Aborting..."
+    puts "\nAborting..."
     File.open "#{session_name}/script.yml", 'w' do |f|
       f.puts script.to_yaml
     end
   end
 end
 
-vm_name = ARGV[0]
-running_vms = []
-`VBoxManage list runningvms`.each_line do |l|
-  vm = l.split[0].gsub('"', '')
-  running_vms << vm
-end
-if not running_vms.include?(vm_name)
-  $stderr.puts "Running VM #{vm_name} not found.\n\n"
+class MyCLI
+  include Mixlib::CLI
 
-  $stderr.puts "Usage: instalatron-record <vm_name> [session_name]"
+  option :vm_name,
+    :short => "-n NAME",
+    :long => "--vm-name NAME",
+    :description => "Virtual Machine Name",
+    :default => "instalatron_#{Time.now.strftime('%s')}"
+ 
+  option :iso_file,
+    :short => "-i ISO",
+    :long => "--iso-file ISO",
+    :description => "ISO file to boot the VM with"
+  
+  option :destroy_vm,
+    :long => "--destroy-vm",
+    :description => "Destroy the VM after running the tests"
+
+  option :vm_memory,
+    :long => "--vm-memory MEM",
+    :description => "VM Memory",
+    :default => 512
+  
+  option :version,
+    :long => "--version",
+    :short => "-v",
+    :description => "Instalatron Version",
+    :proc => Proc.new { puts Instalatron::VERSION; exit 0 }
+
+  option :help,
+    :short => "-h",
+    :long => "--help",
+    :description => "Show this message",
+    :on => :tail,
+    :boolean => true,
+    :show_options => true,
+    :exit => 0
+
+end
+
+def usage(cli)
+  $stderr.puts cli.opt_parser.help
   exit 1
 end
 
-session_name = ARGV[1] || "instalatron_rec_" + Time.now.strftime("%F_%H%M")
+def required_option(cli, opt)
+  if cli.config[opt].nil?
+    $stderr.puts "\n#{opt.to_s} argument requied.\n\n"
+    $stderr.puts cli.opt_parser.help
+    exit 1
+  end
+  return cli.config[opt]
+end
+
+cli = MyCLI.new
+cli.parse_options
+
+vm_name = cli.config[:vm_name]
+
+iso_file = required_option(cli, :iso_file)
+if not File.exist?(iso_file)
+  $stderr.puts "Invalid ISO file.\n\n"
+  usage(cli)
+end
+
+session_name = "instalatron_rec_" + Time.now.strftime("%F_%H%M")
+
+# Create VBox VM first
+$stdout.puts "Creating VM #{vm_name}..."
+Instalatron.create_vm :vm_memory => cli.config[:vm_memory], :vm_name => vm_name, :iso_file => iso_file
 
 record_session  vm_name, session_name
