@@ -1,17 +1,16 @@
-Instalatron
------------
-CLI Tools to test RedHat Anaconda based installers using Oracle's VirtualBox
+# Instalatron
 
-Requirements
-------------
+RedHat Anaconda Testing Framework using Oracle's VirtualBox
+
+# Requirements
+
 Rubygems
 
 VirtualBox >= 4.0.8
 
 ImageMagick >=  6.6.4
 
-Install
--------
+# Install
 
 Make you you have installed VirtualBox and ImageMagick before installing.
 
@@ -20,8 +19,7 @@ Install instalatron gem:
 `sudo gem install instalatron`
 
  
-Examples
---------
+# Examples
 
 Creating a new recording
 
