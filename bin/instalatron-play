@@ -4,11 +4,29 @@ require 'instalatron'
 require 'yaml'
 require 'mixlib/cli'
 require 'logger'
+require 'erb'
 
 def play_session(vm_name, script, custom_seq = nil, key_press_delay = 0)
   ctrlc_gap = 0
   basedir = File.dirname(script)
-  script = YAML.load_file(script)
+  if File.exist?(basedir + '/config.rb')
+    include Instalatron
+    begin
+      require basedir + '/config.rb'
+    rescue Exception => e
+      raise Exception.new("Error loading config.rb file: #{e.message}")
+    end
+
+    begin
+      tmpl = ERB.new(File.read(script))
+      script = YAML.load(tmpl.result)
+    rescue Exception => e
+      raise Exception.new("Error rendering ERB template from script.yml: #{e.message}")
+    end
+
+  else
+    script = YAML.load_file(script)
+  end
   if custom_seq
     new_seq = script[0]
     new_seq[:sequence] = custom_seq

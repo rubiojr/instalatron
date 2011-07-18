@@ -4,7 +4,30 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1.4'
+  VERSION = '0.1.5'
+
+  class ScriptConfig
+
+    @config = {}
+
+    class << self
+      attr_reader :config
+
+      def [](arg)
+        config[arg]
+      end
+    end
+    
+    def self.create(&block)
+      i = self.new
+      i.instance_eval &block
+    end
+
+    def method_missing(symbol, *args, &block)
+      ScriptConfig.config[symbol] = args[0]
+    end
+
+  end
 
   #
   # NIC is nic1, nic2, etc
