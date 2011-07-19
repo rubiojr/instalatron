@@ -45,10 +45,22 @@ def capture_sequence(vm_name)
       capture = "<enter>"
     elsif b == "\t"
       capture = "<tab>"
-    elsif b == 32
-      capture = " "
+    elsif b == " "
+      capture = "<spacebar>"
     elsif b == "$"
       break
+    #
+    # to print special character strings to stdout:
+    # puts "%.3d" % read_char
+    #
+    elsif b == "\e[C"
+      capture = "<Right>"
+    elsif b == "\e[D"
+      capture = "<Left>"
+    elsif b == "\e[B"
+      capture = "<Down>"
+    elsif b == "\e[A"
+      capture = "<Up>"
     else
       capture = b
     end

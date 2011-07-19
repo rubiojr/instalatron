@@ -4,7 +4,7 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1.7'
+  VERSION = '0.1.8'
 
   class ScriptConfig
 
@@ -217,6 +217,7 @@ module Instalatron
           k[')'] = '2a 0b aa 8b';
           
 
+        #showkey -s displays scancodes in Linux
         special=Hash.new;
         special['<Enter>'] = '1c 9c';
         special['<Backspace>'] = '0e 8e';
@@ -229,6 +230,8 @@ module Instalatron
 
         special['<Up>'] = '48 c8';
         special['<Down>'] = '50 d0';
+        special['<Right>'] = '4d cd';
+        special['<Left>'] = '4b cb';
         #special['<PageUp>'] = '01';
         #special['<PageDown>'] = '01';
 
