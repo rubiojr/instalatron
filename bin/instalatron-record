@@ -5,6 +5,60 @@ require 'instalatron'
 require 'yaml'
 require 'mixlib/cli'
 
+#
+# From http://www.alecjacobson.com/weblog/?p=75
+#
+def read_char
+  begin
+    # save previous state of stty
+    old_state = `stty -g`
+    # disable echoing and enable raw (not having to press enter)
+    system "stty raw -echo"
+    c = STDIN.getc.chr
+    # gather next two characters of special keys
+    if(c=="\e")
+      extra_thread = Thread.new{
+        c = c + STDIN.getc.chr
+        c = c + STDIN.getc.chr
+      }
+      # wait just long enough for special keys to get swallowed
+      extra_thread.join(0.00001)
+      # kill thread so not-so-long special keys don't wait on getc
+      extra_thread.kill
+    end
+  rescue => ex
+    puts "#{ex.class}: #{ex.message}"
+    puts ex.backtrace
+  ensure
+    # restore previous state of stty
+    system "stty #{old_state}"
+  end
+  return c
+end
+
+def capture_sequence(vm_name)
+  sequence = ""
+  loop do  
+    b = read_char 
+    capture = b
+    if b.chomp.empty?
+      capture = "<enter>"
+    elsif b == "\t"
+      capture = "<tab>"
+    elsif b == 32
+      capture = " "
+    elsif b == "$"
+      break
+    else
+      capture = b
+    end
+    Instalatron.command_window(capture, vm_name)
+    print capture
+    sequence << capture
+  end
+  sequence
+end
+
 def record_session(vm_name, session_name = "instalatron_rec_" + Time.now.strftime("%F_%H%M"))
   puts "Recording session #{session_name}\n\n"
   script = []
@@ -24,11 +78,8 @@ def record_session(vm_name, session_name = "instalatron_rec_" + Time.now.strftim
       step[:name] = $stdin.gets.strip.chomp
 
       # Capture key sequence
-      print "Key sequence: "
-      step[:sequence] = $stdin.gets.strip.chomp
-      if step[:sequence].empty?
-        step[:sequence] = "<Enter>"
-      end
+      print "Key sequence (press $ and then enter to end): "
+      step[:sequence] = capture_sequence(vm_name)
       
       # Copy screenshot to session dir
       step[:image] = "#{step[:name].gsub(' ','_').downcase}.png"
@@ -36,7 +87,7 @@ def record_session(vm_name, session_name = "instalatron_rec_" + Time.now.strftim
 
       script << step
       puts 
-      Instalatron.command_window(step[:sequence], vm_name)
+      puts
       screen_count += 1
       print "Press ENTER to grab screen (#{screen_count})..."
       $stdin.gets
