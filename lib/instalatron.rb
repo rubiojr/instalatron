@@ -4,7 +4,7 @@ require 'virtualbox'
 
 module Instalatron
   
-  VERSION = '0.1.5'
+  VERSION = '0.1.6'
 
   class ScriptConfig
 
@@ -68,7 +68,7 @@ module Instalatron
     vboxcmd = params[:vboxcmd] || 'VBoxManage'
     vm_memory = params[:vm_memory] || 512
     vm_cpus = params[:vm_cpus] || 1
-    vm_disk_size = params[:vm_disk_size].to_i || 8192
+    vm_disk_size = (params[:vm_disk_size] || 8192).to_i
     if params[:headless].nil?
       params[:headless] = false
     end
