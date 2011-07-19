@@ -78,7 +78,7 @@ def record_session(vm_name, session_name = "instalatron_rec_" + Time.now.strftim
       step[:name] = $stdin.gets.strip.chomp
 
       # Capture key sequence
-      print "Key sequence (press $ and then enter to end): "
+      print "Key sequence (press $ to end): "
       step[:sequence] = capture_sequence(vm_name)
       
       # Copy screenshot to session dir
