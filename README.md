@@ -4,6 +4,8 @@ RedHat Anaconda Testing Framework using Oracle's VirtualBox
 
 # Requirements
 
+Ruby 1.8 (doesn't work with ruby 1.9 currently)
+
 Rubygems
 
 VirtualBox >= 4.0.8
