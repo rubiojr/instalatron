@@ -23,7 +23,8 @@ Install instalatron gem:
 * Automatic creation of VMs to run the testing sessions
 * Semi-automatic recording of the testing session (instalatron-record).
   See http://www.youtube.com/watch?v=TpdXdRqNpB4
-* Replay recorded sessions with instalatron-play
+* Replay recorded sessions with instalatron-play.
+  See http://www.youtube.com/watch?v=TDL0nBFO5vM
 * variable interpolation with ERB syntax
 * Recorded sessions are simple text files (YAML) and images that can be edited and manipulated with standard tools 
 
