@@ -43,3 +43,7 @@ Running a recorded script
 
 This will create a VM with 1024 MB of RAM and use the script found in 'path-to-previous-recording-dir directory to create a Cloud in a Box install.
 
+There's some technical info available in the wiki:
+
+https://github.com/abiquo/instalatron/wiki
+
